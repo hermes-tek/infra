@@ -1,0 +1,57 @@
+services:
+  keycloak_db:
+    image: postgres:17.5-alpine3.21
+    container_name: keycloak_postgres_db
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${KC_DB_NAME}
+      POSTGRES_USER: ${KC_DB_USER}
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - keycloak_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KC_DB_USER} -d ${KC_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.1
+    container_name: keycloak
+    command: start-dev --import-realm
+    env_file: .env
+    environment:
+      KC_DB: ${KC_DB_VENDOR}
+      KC_DB_URL: jdbc:postgresql://${KC_DB_HOST}:5432/${KC_DB_NAME}
+      KC_DB_USERNAME: ${KC_DB_USER}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+    volumes:
+      - ./keycloak-config:/opt/keycloak/data/import
+      - keycloak_data:/opt/keycloak/data
+    ports:
+      - "8080:8080"
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
+    networks:
+      - keycloak_internal
+      - public
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  keycloak_data:
+
+networks:
+  keycloak_internal:
+    driver: bridge
+  public:
+    driver: bridge
