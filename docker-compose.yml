@@ -52,6 +52,9 @@ volumes:
 
 networks:
   keycloak_internal:
+    name: keycloak_internal
     driver: bridge
   public:
+    name: public_network
     driver: bridge
+    external: true
