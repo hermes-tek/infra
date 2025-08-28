@@ -29,7 +29,7 @@ services:
       KC_DB_USERNAME: ${KC_DB_USER}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD}
     volumes:
-      - ./keycloak-config:/opt/keycloak/data/import
+      - ./keycloak:/opt/keycloak/data/import
       - keycloak_data:/opt/keycloak/data
     ports:
       - "8080:8080"
