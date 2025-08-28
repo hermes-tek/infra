@@ -22,7 +22,7 @@ docker network create --driver bridge public_network
 Copy the example environment file and adjust the values as needed:
 
 ```sh
-cp .env.develop .env
+cp .env.example .env
 ```
 
 #### 3. Start the services
