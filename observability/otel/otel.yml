@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+      http: {}
+
+processors:
+  batch: {}
+  resource:
+    attributes:
+      - key: service.name
+        value: infra-otel-collector
+        action: insert
+      - key: deployment.environment
+        value: dev
+        action: insert
+
+exporters:
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  prometheus:
+    endpoint: "0.0.0.0:9464"
+
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      attributes:
+        service_name: service.name
+        deployment_environment: deployment.environment
+        http_method: http.request.method
+        http_route: http.route
+        http_status: http.response.status_code
+        container: container.name
+        severity: severity_text
+    format: json      
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [loki]
