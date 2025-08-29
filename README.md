@@ -11,10 +11,10 @@ This project provides infrastructure for running Keycloak with a PostgreSQL data
 
 #### 1. Create the external Docker network
 
-This project requires an external Docker network named `public_network`. If it does not exist, create it with:
+This project requires an external Docker network named `shared_network`. If it does not exist, create it with:
 
 ```sh
-docker network create --driver bridge public_network
+docker network create --driver bridge shared_network
 ```
 
 #### 2. Configure environment variables
